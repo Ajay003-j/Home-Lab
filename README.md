@@ -15,9 +15,9 @@ The lab is split into three segments behind pfSense:
 
 | Segment | Subnet | Purpose |
 |---|---|---|
-| **OPT1** | `172.16.0.0/24` | Isolated attack network — Kali Linux only |
-| **Gateway / inspection** | — | pfSense + Suricata IPS, routes OPT1 ↔ LAN, blocks malicious traffic inline |
-| **LAN** | `10.0.0.0/24` | Protected internal network — Domain Controller, Splunk + Snort, domain-joined Windows 10 and Ubuntu clients |
+| **OPT1** | `172.16.0.0/24` | Isolated attack network - Kali Linux only |
+| **Gateway / inspection** | - | pfSense + Suricata IPS, routes OPT1 ↔ LAN, blocks malicious traffic inline |
+| **LAN** | `10.0.0.0/24` | Protected internal network - Domain Controller, Splunk + Snort, domain-joined Windows 10 and Ubuntu clients |
 
 This mirrors a real enterprise pattern: an untrusted zone, a gateway that inspects and filters traffic between zones, and a protected internal network where the actual assets live.
 
@@ -32,13 +32,13 @@ This mirrors a real enterprise pattern: an untrusted zone, a gateway that inspec
 | Splunk + Snort | `10.0.0.4` | SIEM (log aggregation, correlation, alerting) + passive Snort IDS |
 | Windows 10 client | `10.0.0.3` | Domain-joined endpoint, Sysmon + Splunk Universal Forwarder |
 | Ubuntu client | `10.0.0.5` | Domain-joined via SSSD |
-| Kali Linux | `172.16.0.2` | Red team box — recon and brute-force source |
+| Kali Linux | `172.16.0.2` | Red team box - recon and brute-force source |
 
 ---
 
 ## 1. Building the network and joining the domain
 
-pfSense was built with three interfaces — WAN, LAN, and OPT1 — to keep the simulated attacker fully isolated from the protected network until traffic is explicitly routed and inspected.
+pfSense was built with three interfaces — WAN, LAN, and OPT1 - to keep the simulated attacker fully isolated from the protected network until traffic is explicitly routed and inspected.
 
 ![pfSense console showing WAN/LAN/OPT1 interface assignment](screenshots/02-pfsense-console-interfaces.png)
 
@@ -82,7 +82,7 @@ Domain authentication was verified end-to-end with Kerberos directly from the Ub
 
 ## 2. Detection engineering
 
-Before simulating any attack, detection logic was written and the telemetry pipeline was wired up first — so nothing would go undetected once the red team started.
+Before simulating any attack, detection logic was written and the telemetry pipeline was wired up first - so nothing would go undetected once the red team started.
 
 **Snort** was deployed as a passive IDS to flag reconnaissance and common web/auth attack patterns, with a small set of custom signatures:
 
@@ -106,11 +106,11 @@ On the Windows side, Sysmon and the Splunk Universal Forwarder were configured t
 
 With detection in place, an attack chain was run from the isolated Kali box, mapped to MITRE ATT&CK:
 
-**Reconnaissance (TA0043 / T1595)** — an Nmap scan from Kali fingerprinted the domain controller and confirmed it as a Windows AD server (ports 88, 389, 445, 3268 open):
+**Reconnaissance (TA0043 / T1595)** - an Nmap scan from Kali fingerprinted the domain controller and confirmed it as a Windows AD server (ports 88, 389, 445, 3268 open):
 
 ![Nmap recon against the domain controller from Kali](screenshots/11-nmap-recon-against-dc.png)
 
-**Credential access (TA0006 / T1110.001)** — Hydra then brute-forced the local administrator account over SMB using a 100k-entry password wordlist, generating 3,000+ failed logon attempts:
+**Credential access (TA0006 / T1110.001)** - Hydra then brute-forced the local administrator account over SMB using a 100k-entry password wordlist, generating 3,000+ failed logon attempts:
 
 ![Hydra SMB brute force against the administrator account](screenshots/12-hydra-smb-bruteforce.png)
 
@@ -126,7 +126,7 @@ The passive Snort sensor caught the reconnaissance phase in real time, flagging 
 
 ## 4. Detection & blocking
 
-This is the core defensive control in the lab: **Suricata running inline on pfSense**, sitting between the attack segment and the LAN, with a custom high-priority rule written to catch the SMB brute-force pattern and drop it at the gateway — before it reaches the domain controller.
+This is the core defensive control in the lab: **Suricata running inline on pfSense**, sitting between the attack segment and the LAN, with a custom high-priority rule written to catch the SMB brute-force pattern and drop it at the gateway - before it reaches the domain controller.
 
 ![pfSense Suricata Alerts — brute force traffic blocked inline](screenshots/14-pfsense-suricata-alerts-blocked.png)
 
@@ -146,7 +146,7 @@ A simple SPL query against the failed SMB logon status confirms the volume of th
 index="ips" smb.status=STATUS_LOGON_FAILURE
 ```
 
-That was built into a dashboard aggregating failed logons by source IP and username — clearly isolating the attacking host and the targeted account:
+That was built into a dashboard aggregating failed logons by source IP and username - clearly isolating the attacking host and the targeted account:
 
 ![Splunk brute-force dashboard — failed logons by source IP](screenshots/16-splunk-bruteforce-dashboard.png)
 
@@ -154,7 +154,7 @@ That was built into a dashboard aggregating failed logons by source IP and usern
 |---|---|---|
 | `172.16.0.2` | `administrator` | `3182` |
 
-Finally, a scheduled Splunk alert runs hourly against this search and emails the analyst if any failed-logon events are found in the window — closing the loop from raw packet capture to an actionable notification:
+Finally, a scheduled Splunk alert runs hourly against this search and emails the analyst if any failed-logon events are found in the window - closing the loop from raw packet capture to an actionable notification:
 
 ![Scheduled Splunk alert for AD brute-force detection](screenshots/17-splunk-scheduled-alert-config.png)
 
@@ -170,7 +170,7 @@ Finally, a scheduled Splunk alert runs hourly against this search and emails the
 | SIEM visibility | Full attack ingested into Splunk via EVE JSON over syslog, searchable and dashboarded |
 | Alerting | Hourly scheduled Splunk alert configured to notify on new brute-force activity |
 
-The domain controller never had to absorb the brute-force traffic directly — it was stopped at the network boundary, with full visibility retained in the SIEM for investigation.
+The domain controller never had to absorb the brute-force traffic directly - it was stopped at the network boundary, with full visibility retained in the SIEM for investigation.
 
 ---
 
