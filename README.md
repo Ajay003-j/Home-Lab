@@ -38,7 +38,7 @@ This mirrors a real enterprise pattern: an untrusted zone, a gateway that inspec
 
 ## 1. Building the network and joining the domain
 
-pfSense was built with three interfaces — WAN, LAN, and OPT1 - to keep the simulated attacker fully isolated from the protected network until traffic is explicitly routed and inspected.
+pfSense was built with three interfaces - WAN, LAN, and OPT1 - to keep the simulated attacker fully isolated from the protected network until traffic is explicitly routed and inspected.
 
 ![pfSense console showing WAN/LAN/OPT1 interface assignment](screenshots/02-pfsense-console-interfaces.png)
 
@@ -70,13 +70,13 @@ network:
 
 Both client types were joined to the `ad.stars.com` domain and organized into OUs by platform (`stars/linux`, `stars/windows`) for cleaner policy management:
 
-![AD OU structure — Linux client](screenshots/05-ad-ou-linux-user.png)
+![AD OU structure - Linux client](screenshots/05-ad-ou-linux-user.png)
 
 Domain authentication was verified end-to-end with Kerberos directly from the Ubuntu client, including walking through the forced password change on first login:
 
 ![kinit Kerberos authentication from the domain-joined Ubuntu client](screenshots/06-kerberos-kinit-domain-join.png)
 
-![AD OU structure — Windows client](screenshots/07-ad-ou-windows-user.png)
+![AD OU structure - Windows client](screenshots/07-ad-ou-windows-user.png)
 
 ---
 
