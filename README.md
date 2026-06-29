@@ -1,5 +1,5 @@
 # Home-Lab
-# SOC Homelab — Detecting & Blocking an Active Directory Brute-Force Attack
+# SOC Homelab - Detecting & Blocking an Active Directory Brute-Force Attack
 
 A self-hosted blue team lab built to practice the full detection lifecycle: segmenting a network, joining clients to Active Directory, standing up an IDS/IPS, simulating a real attack chain from a red team box, and catching/blocking it with SIEM correlation and inline IPS rules.
 
